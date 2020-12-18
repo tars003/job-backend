@@ -3,9 +3,12 @@ const jwt = require('jsonwebtoken');
 const Profile = require('../models/Profile');
 
 const auth = require('../middleware/auth');
+const { formatOccupations } = require('../middleware/occupations');
 
 router = Router();
 
+
+// INITAL TOKEN ROUTE
 router.get('/token/:no', async(req, res) => {
     try {
         const profile = await Profile.findOne({ contactNumber: req.params.no });
@@ -36,6 +39,33 @@ router.get('/token/:no', async(req, res) => {
     }
 });
 
+router.post('/edit', auth, async(req, res) => {
+    try {
+        const profile = await Profile.findById(req.body.user.id);
+        profile.city = req.body.city;
+        profile.state = req.body.state;
+        profile.occupations = formatOccupations(req.body.occupations);
+        profile.age = req.body.age;
+        profile.gender = req.body.gender;
+        profile.name = req.body.name;
+        await profile.save();
+
+        const newProfile = await Profile.findById(req.body.user.id);
+        return res.status(200).json({
+            sucess: true,
+            data: newProfile
+        })
+
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            sucess: false,
+            message: err
+        });
+    }
+})
+
+// PROFILE DETAILS ROUTE
 router.get('/view', auth, async(req, res) => {
     try {
         const profile = await Profile.findOne({ contactNumber: req.body.user.contactNumber });
@@ -61,6 +91,7 @@ router.get('/view', auth, async(req, res) => {
     }
 })
 
+// CREATE PROFILE ROUTE
 router.post('/create', async(req, res) => {
     try {
         const contactNumber = req.body.contactNumber;
@@ -76,17 +107,22 @@ router.post('/create', async(req, res) => {
 
         const city = req.body.city;
         const state = req.body.state;
-        const occupations = req.body.occupations;
+        const occupations = formatOccupations(req.body.occupations);
+        const age = req.body.age;
+        const gender = req.body.gender;
+        const name = req.body.name;
 
         const payload = {
             contactNumber,
             city,
             state,
-            occupations
+            occupations,
+            age,
+            gender,
+            name
         }
 
         console.log(payload);
-        console.log(typeof occupations);
         const newProfile = await Profile.create(payload);
 
         const tokenPayload = {
