@@ -10,7 +10,7 @@ connectDB();
 app.use(express.json());
 
 app.use('/profile', require('./routes/profile'));
-
+app.use('/admin', require('./routes/admin'));
 
 
 
