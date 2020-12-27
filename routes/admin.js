@@ -12,8 +12,6 @@ router.post('/login', async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
-        console.log(obj);
-        console.log('%%%%%%%%%%%%%%%%%');
         const { email, password } = obj;
         if (!email || !password) {
             res.status(400).json({ msg: "Invalid credentials" });
@@ -67,7 +65,7 @@ router.post('/create', async(req, res) => {
         const admin = new Admin({
             name,
             email,
-            company,
+            company,    
             password: pass
         });
         await admin.save();
