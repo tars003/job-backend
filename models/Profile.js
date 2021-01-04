@@ -26,6 +26,18 @@ const ProfileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  language: {
+    type: String,
+    required: false,
+  },
+  applications: [
+    {
+      application: {
+        type: Schema.Types.ObjectId,
+        required: false
+      },
+    }
+  ],
   occupations: [
     {
       occupation: {

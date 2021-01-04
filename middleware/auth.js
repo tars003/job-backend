@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const Profile = require("../models/Profile");
+const Admin = require("../models/Admin");
 
 module.exports = async function (req, res, next) {
   const token = req.get("auth-token");
@@ -11,6 +12,9 @@ module.exports = async function (req, res, next) {
       const { data } = jwt.verify(token, process.env.JWT_SECRET);
       const id = data.id;
       let user = await Profile.findById(id);
+      if(!user) {
+        user = await Admin.findById(id);
+      }
       if (user) {
         req.body.user = user;
         next();

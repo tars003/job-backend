@@ -6,18 +6,19 @@ const auth = require('../middleware/auth');
 
 router = Router();
 
-router.post('/create', async(req, res) => {
+router.post('/create', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const adminId = req.body.user.id;
         const {
            companyName,
-           admin,
            city,
            state,
            salary,
            payBasis,
            professionType,
+           type,
            openings,
            minQualification,
            language,
@@ -27,8 +28,10 @@ router.post('/create', async(req, res) => {
            address
         } = obj;
 
-        console.log(minQualification);
-        console.log(language);
+        obj['admin'] = adminId;
+
+        console.log('obj');
+        console.log(obj);
 
         const job = new Job(obj);
 

@@ -111,6 +111,7 @@ router.post('/create', async(req, res) => {
         const age = req.body.age;
         const gender = req.body.gender;
         const name = req.body.name;
+        const language = req.body.language;
 
         const payload = {
             contactNumber,
@@ -119,7 +120,8 @@ router.post('/create', async(req, res) => {
             occupations,
             age,
             gender,
-            name
+            name,
+            language
         }
 
         console.log(payload);
