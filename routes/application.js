@@ -10,6 +10,35 @@ const { formatOccupations } = require('../middleware/occupations');
 
 router = Router();
 
+router.get('/view/applicant', auth, async(req, res) => {
+    try {
+        const applicant = await Profile.findById(req.body.user.id);
+        var applicationsArr;
+        const applications = await applicant.applications.map(async (application) => {
+            const applicationObj = await Application.findById(application.application);
+            console.log(applicationObj);
+            const jobObj = await Job.findById(applicationObj.job);
+            console.log(jobObj)
+            applicationObj['job'] = jobObj;
+            // applicationsArr.push(applicationObj);
+            return applicationObj;
+        })
+
+        console.log(applications);
+        return res.status(200).json({
+            success: true,
+            data: applications
+        });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: true,
+            message: err
+        })
+    }
+});
+
 router.post('/create', auth, async(req, res) => {
     try {
         let obj = req.body;
