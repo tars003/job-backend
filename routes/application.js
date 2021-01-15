@@ -10,25 +10,37 @@ const { formatOccupations } = require('../middleware/occupations');
 
 router = Router();
 
+// GET APPLIED JOBS for a profile
 router.get('/view/applicant', auth, async(req, res) => {
     try {
         const applicant = await Profile.findById(req.body.user.id);
         var applicationsArr;
-        const applications = await applicant.applications.map(async (application) => {
-            const applicationObj = await Application.findById(application.application);
-            console.log(applicationObj);
-            const jobObj = await Job.findById(applicationObj.job);
-            console.log(jobObj)
-            applicationObj['job'] = jobObj;
-            // applicationsArr.push(applicationObj);
-            return applicationObj;
-        })
 
-        console.log(applications);
-        return res.status(200).json({
-            success: true,
-            data: applications
+        const applicationsPromise =  applicant.applications.map((application) => {
+            return Application.findById(application.application);
         });
+
+        const statusArr = [];
+        Promise.all(applicationsPromise)
+            .then((res) => {
+                // console.log(res);
+                return res;
+            })
+            .then((res) => {
+                const jobPromise = Promise.all(res.map((application) => {
+                    statusArr.push(application.status);
+                    return Job.findById(application.job);
+                }))
+                return jobPromise;
+            }).then((result) => {
+                const data = result.map((job, index) => {
+                    return {job, status: statusArr[index]};
+                })
+                return res.status(200).json({
+                    success: true,
+                    jobs: data
+                });
+            })
 
     } catch(err) {
         console.log(err);
@@ -39,21 +51,18 @@ router.get('/view/applicant', auth, async(req, res) => {
     }
 });
 
+
+// CREATE APPLICATION with jobId and profileId
 router.post('/create', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
         const applicantId = req.body.user.id;
         obj['applicant'] = applicantId;
-
-        console.log('obj before db insertion');
-        console.log(obj);
-
         const application = new Application(obj);
         await application.save();
-
         const applicant = await Profile.findById(applicantId);
-        console.log(applicant);
+
         if(applicant.applications){
             applicant.applications.push({
                 application: application.id,
@@ -65,8 +74,6 @@ router.post('/create', auth, async(req, res) => {
                 }
             ]
         }
-
-
         const job = await Job.findById(req.body.job);
         console.log(job)
         if(job.applications){
@@ -80,13 +87,8 @@ router.post('/create', auth, async(req, res) => {
                 }
             ]
         }
-
         await job.save();
         await applicant.save();
-
-        console.log(job);
-        console.log(applicant);
-
         return res.status(200).json({
             success: true,
             data: application
