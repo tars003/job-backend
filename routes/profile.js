@@ -112,6 +112,7 @@ router.post('/create', async(req, res) => {
         const gender = req.body.gender;
         const name = req.body.name;
         const language = req.body.language;
+        const salaryRange = req.body.salaryRange;
 
 
 
@@ -123,7 +124,8 @@ router.post('/create', async(req, res) => {
             age,
             gender,
             name,
-            language
+            language,
+            salaryRange
         }
 
         console.log('payload');
