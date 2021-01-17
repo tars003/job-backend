@@ -6,6 +6,71 @@ const auth = require('../middleware/auth');
 
 router = Router();
 
+// ROUTE FOR SEARCH PAGE ( Sorted list of jobs based on profession type provided )
+router.post('/search/', auth, async(req, res) => {
+    try {
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+
+        console.log(req.body.user.applications);
+
+        if(obj.professionType) {
+            Promise.all(obj.professionType.map((i) => {
+              const jobsPromise = Job.find({ professionType: i });
+              return jobsPromise;
+            })).then((result) => {
+              // BOTH PROFESSION TYPE AND LOCATION ARE PROVIDED
+              if(obj.location) {
+                const jobs = [];
+                result.map((data) => {
+                    const jobData = [];
+                    data.map((job) => {
+                        if(job.city == obj.location.city && job.state == obj.location.state) {
+                            jobData.push(job);
+                        }
+                    });
+                    jobs.push(jobData);
+                })
+
+                return res.status(200).json({
+                    success: true,
+                    data: jobs
+                });
+              }
+              // ONLY PROFESSION TYPE WAS PROVIDED
+              else {
+                return res.status(200).json({
+                    success: true,
+                    data: result
+                });
+            }
+            });
+        }
+        // ONLY LOCATION WAS PROVIDED
+        else if(obj.location) {
+            const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
+            return res.status(200).json({
+                success: true,
+                data: jobs
+            });
+        }
+        // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
+        else {
+            res.status(400).json({
+                success: false,
+                message: 'NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED'
+            })
+        }
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
 
 // ROUTE FOR HOME PAGE ( Sorted list of jobs based on profession type provided )
 router.post('/search/profession', auth, async(req, res) => {
@@ -34,6 +99,8 @@ router.post('/search/profession', auth, async(req, res) => {
     }
 })
 
+
+// ROUTE TO CREATE A JOB
 router.post('/create', auth, async(req, res) => {
     try {
         let obj = req.body;

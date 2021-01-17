@@ -30,6 +30,10 @@ const ProfileSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  salaryRange : {
+    type: String,
+    required: false
+  },
   applications: [
     {
       application: {

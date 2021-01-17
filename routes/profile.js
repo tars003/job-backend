@@ -113,11 +113,7 @@ router.post('/create', async(req, res) => {
         const name = req.body.name;
         const language = req.body.language;
 
-        console.log('occupations');
-        console.log(req.body);
-        let obj = req.body;
-        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
-        console.log(obj);
+
 
         const payload = {
             contactNumber,
