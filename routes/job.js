@@ -57,7 +57,7 @@ router.post('/search/', auth, async(req, res) => {
             console.log(jobs);
             return res.status(200).json({
                 success: true,
-                data: jobs
+                data: [jobs, ]
             });
         }
         // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
