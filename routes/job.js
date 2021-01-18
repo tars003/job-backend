@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
 const Job = require('../models/Job');
+const Application = require('../models/Application');
 
 const auth = require('../middleware/auth');
 
@@ -13,61 +14,87 @@ router.post('/search/', auth, async(req, res) => {
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
         console.log('incoming');
         console.log(obj);
-        console.log(obj.professionType.length)
+        console.log(obj.professionType.length);
 
+        Promise.all(req.body.user.applications.map((application) => {
+            const applicationPromise = Application.findById(application.application);
+            return applicationPromise;
+        })).then((applicationObjArr) => {
+            const jobIds = applicationObjArr.map((applicationObj) => {
+                return application.job;
+            });
 
-        if(obj.professionType.length > 0) {
-            console.log('inside log 1')
-            Promise.all(obj.professionType.map((i) => {
-              const jobsPromise = Job.find({ professionType: i });
-              return jobsPromise;
-            })).then((result) => {
-              // BOTH PROFESSION TYPE AND LOCATION ARE PROVIDED
-              if(obj.location.city !== '') {
-                const jobs = [];
-                result.map((data) => {
-                    const jobData = [];
-                    data.map((job) => {
-                        if(job.city == obj.location.city && job.state == obj.location.state) {
-                            jobData.push(job);
-                        }
+            // CHECKING IF REQUEST CONTAINS PROFESSION FOR SEARCH
+            if(obj.professionType.length > 0) {
+                // Querying DB for professions provided
+                Promise.all(obj.professionType.map((i) => {
+                  const jobsPromise = Job.find({ professionType: i });
+                  return jobsPromise;
+                })).then((result) => {
+                  // BOTH PROFESSION TYPE AND LOCATION ARE PROVIDED
+                  if(obj.location.city !== '') {
+                    const jobs = [];
+                    result.map((data) => {
+                        const jobData = [];
+                        data.map((job) => {
+                            // Fitering out jobs only for the location provided
+                            if(job.city == obj.location.city && job.state == obj.location.state) {
+                                // Filtering out ALREADY APPLIED JOBS
+                                if(!jobIds.includes(job.id)){
+                                    jobData.push(job);
+                                }
+                            }
+                        });
+                        jobs.push(jobData);
+                    })
+                    return res.status(200).json({
+                        success: true,
+                        data: jobs
                     });
-                    jobs.push(jobData);
-                })
-
-                return res.status(200).json({
-                    success: true,
-                    data: jobs
-                });
-              }
-              // ONLY PROFESSION TYPE WAS PROVIDED
-              else {
-                return res.status(200).json({
-                    success: true,
-                    data: result
+                  }
+                  // ONLY PROFESSION TYPE WAS PROVIDED
+                  else {
+                    const jobs = [];
+                    result.map((data) => {
+                        const jobData = [];
+                        data.map((job) => {
+                            // Filtering out ALREADY APPLIED JOBS
+                            if(!jobIds.includes(job.id)){
+                                jobData.push(job);
+                            }
+                        });
+                        jobs.push(jobData);
+                    })
+                    return res.status(200).json({
+                        success: true,
+                        data: result
+                    });
+                }
                 });
             }
-            });
-        }
-        // ONLY LOCATION WAS PROVIDED
-        else if(obj.location.city !== '') {
-            console.log('log inside 2nd');
-            console.log(obj.location);
-            const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
-            console.log(jobs);
-            return res.status(200).json({
-                success: true,
-                data: [jobs, ]
-            });
-        }
-        // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
-        else {
-            console.log('inside else last')
-            res.status(400).json({
-                success: false,
-                message: 'NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED'
-            })
-        }
+            // ONLY LOCATION WAS PROVIDED
+            else if(obj.location.city !== '') {
+                const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
+                const jobData = [];
+                jobs.map((job) => {
+                    // Filtering out ALREADY APPLIED JOBS
+                    if(!jobIds.includes(job.id)){
+                        return jobData.push(job);
+                    }
+                })
+                return res.status(200).json({
+                    success: true,
+                    data: [jobData, ]
+                });
+            }
+            // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
+            else {
+                res.status(400).json({
+                    success: false,
+                    message: 'NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED'
+                })
+            }
+        })
 
     } catch(err) {
         console.log(err);
