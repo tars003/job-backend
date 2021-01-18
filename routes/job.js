@@ -17,6 +17,7 @@ router.post('/search/', auth, async(req, res) => {
 
 
         if(obj.professionType.length > 0) {
+            console.log('inside log 1')
             Promise.all(obj.professionType.map((i) => {
               const jobsPromise = Job.find({ professionType: i });
               return jobsPromise;
@@ -50,6 +51,7 @@ router.post('/search/', auth, async(req, res) => {
         }
         // ONLY LOCATION WAS PROVIDED
         else if(obj.location.city !== '') {
+            console.log('log inside 2nd')
             const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
             return res.status(200).json({
                 success: true,
@@ -58,6 +60,7 @@ router.post('/search/', auth, async(req, res) => {
         }
         // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
         else {
+            console.log('inside else last')
             res.status(400).json({
                 success: false,
                 message: 'NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED'
