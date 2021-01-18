@@ -51,7 +51,8 @@ router.post('/search/', auth, async(req, res) => {
         }
         // ONLY LOCATION WAS PROVIDED
         else if(obj.location.city !== '') {
-            console.log('log inside 2nd')
+            console.log('log inside 2nd');
+            console.log(obj.location);
             const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
             return res.status(200).json({
                 success: true,
