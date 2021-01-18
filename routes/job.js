@@ -13,6 +13,7 @@ router.post('/search/', auth, async(req, res) => {
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
         console.log('incoming');
         console.log(obj);
+        console.log(obj.professionType.length)
 
 
         if(obj.professionType.length > 0) {
