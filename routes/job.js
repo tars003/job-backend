@@ -74,18 +74,20 @@ router.post('/search/', auth, async(req, res) => {
             }
             // ONLY LOCATION WAS PROVIDED
             else if(obj.location.city !== '') {
-                const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
-                const jobData = [];
-                jobs.map((job) => {
-                    // Filtering out ALREADY APPLIED JOBS
-                    if(!jobIds.includes(job.id)){
-                        return jobData.push(job);
-                    }
+                const jobsPromise = Job.find({ city: obj.location.city, state: obj.location.state });
+                jobsPromise.then((jobs) => {
+                    const jobData = [];
+                    jobs.map((job) => {
+                        // Filtering out ALREADY APPLIED JOBS
+                        if(!jobIds.includes(job.id)){
+                            return jobData.push(job);
+                        }
+                    })
+                    return res.status(200).json({
+                        success: true,
+                        data: [jobData, ]
+                    });
                 })
-                return res.status(200).json({
-                    success: true,
-                    data: [jobData, ]
-                });
             }
             // NEITHER LOCATION NOR PROFESSION TYPE WAS PROVIDED
             else {
