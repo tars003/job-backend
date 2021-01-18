@@ -14,13 +14,13 @@ router.post('/search/', auth, async(req, res) => {
 
         console.log(req.body.user.applications);
 
-        if(obj.professionType) {
+        if(obj.professionType.length > 0) {
             Promise.all(obj.professionType.map((i) => {
               const jobsPromise = Job.find({ professionType: i });
               return jobsPromise;
             })).then((result) => {
               // BOTH PROFESSION TYPE AND LOCATION ARE PROVIDED
-              if(obj.location) {
+              if(obj.location !== '') {
                 const jobs = [];
                 result.map((data) => {
                     const jobData = [];
@@ -47,7 +47,7 @@ router.post('/search/', auth, async(req, res) => {
             });
         }
         // ONLY LOCATION WAS PROVIDED
-        else if(obj.location) {
+        else if(obj.location !== '') {
             const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
             return res.status(200).json({
                 success: true,
