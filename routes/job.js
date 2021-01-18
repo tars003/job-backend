@@ -22,7 +22,7 @@ router.post('/search/', auth, async(req, res) => {
               return jobsPromise;
             })).then((result) => {
               // BOTH PROFESSION TYPE AND LOCATION ARE PROVIDED
-              if(obj.location !== '') {
+              if(obj.location.city !== '') {
                 const jobs = [];
                 result.map((data) => {
                     const jobData = [];
@@ -49,7 +49,7 @@ router.post('/search/', auth, async(req, res) => {
             });
         }
         // ONLY LOCATION WAS PROVIDED
-        else if(obj.location !== '') {
+        else if(obj.location.city !== '') {
             const jobs = await Job.find({ city: obj.location.city, state: obj.location.state });
             return res.status(200).json({
                 success: true,
