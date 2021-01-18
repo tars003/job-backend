@@ -11,8 +11,9 @@ router.post('/search/', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        console.log('incoming');
+        console.log(obj);
 
-        console.log(req.body.user.applications);
 
         if(obj.professionType.length > 0) {
             Promise.all(obj.professionType.map((i) => {
