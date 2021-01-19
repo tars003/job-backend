@@ -12,16 +12,17 @@ router.post('/search/', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
-        console.log('incoming');
-        console.log(obj);
-        console.log(obj.professionType.length);
+        // console.log('incoming');
+        // console.log(obj);
+        // console.log(obj.professionType.length);
 
         Promise.all(req.body.user.applications.map((application) => {
             const applicationPromise = Application.findById(application.application);
             return applicationPromise;
         })).then((applicationObjArr) => {
+            console.log(applicationObjArr);
             const jobIds = applicationObjArr.map((applicationObj) => {
-                return application.job;
+                return applicationObj.job;
             });
 
             // CHECKING IF REQUEST CONTAINS PROFESSION FOR SEARCH
