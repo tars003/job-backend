@@ -3,7 +3,8 @@ const AdminSchema = mongoose.Schema({
     name : String,
     email: String,
     company: String,
-    password: String
+    password: String,
+    phone: String,
 });
 
 module.exports = mongoose.model("admin", AdminSchema);

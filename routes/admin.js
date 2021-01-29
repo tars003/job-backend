@@ -35,6 +35,8 @@ router.get('/email/check/:email', async(req, res) => {
     }
 })
 
+
+// LOGIN ROUTE
 router.post('/login', async(req, res) => {
     try {
         let obj = req.body;
@@ -75,6 +77,8 @@ router.post('/login', async(req, res) => {
     }
 });
 
+
+// CREATING ADMIN
 router.post('/create', async(req, res) => {
     try {
         let obj = req.body;
@@ -83,7 +87,8 @@ router.post('/create', async(req, res) => {
            name,
            email,
            company,
-           password
+           password,
+           phone,
         } = obj;
 
         const salt = await bcrypt.genSalt();
@@ -93,7 +98,8 @@ router.post('/create', async(req, res) => {
             name,
             email,
             company,
-            password: pass
+            password: pass,
+            phone,
         });
         await admin.save();
 
