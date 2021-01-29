@@ -12,18 +12,21 @@ router.post('/search/', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
-        // console.log('incoming');
-        // console.log(obj);
-        // console.log(obj.professionType.length);
 
         Promise.all(req.body.user.applications.map((application) => {
             const applicationPromise = Application.findById(application.application);
             return applicationPromise;
         })).then((applicationObjArr) => {
-            console.log(applicationObjArr);
-            const jobIds = applicationObjArr.map((applicationObj) => {
+            const jobIdArr = applicationObjArr.map((applicationObj) => {
                 return applicationObj.job;
             });
+
+            const jobIds = jobIdArr.map(jobId => {
+                return String(jobId);
+            });
+
+            console.log('job idsssssssssssssss');
+            console.log(jobIds);
 
             // CHECKING IF REQUEST CONTAINS PROFESSION FOR SEARCH
             if(obj.professionType.length > 0) {
@@ -41,6 +44,8 @@ router.post('/search/', auth, async(req, res) => {
                             // Fitering out jobs only for the location provided
                             if(job.city == obj.location.city && job.state == obj.location.state) {
                                 // Filtering out ALREADY APPLIED JOBS
+                                console.log(job.id)
+                                console.log(jobIds.includes(job.id))
                                 if(!jobIds.includes(job.id)){
                                     jobData.push(job);
                                 }
@@ -123,8 +128,6 @@ router.post('/search/profession', auth, async(req, res) => {
             const jobIds = applicationObjArr.map((applicationObj) => {
                 return applicationObj.job;
             });
-            console.log('job idssssssssssssssssss');
-            console.log(jobIds);
             Promise.all(obj.professionType.map((i) => {
               // console.log('inside array map');
               // console.log(i);
@@ -141,10 +144,7 @@ router.post('/search/profession', auth, async(req, res) => {
                 result.map((data) => {
                     const jobData = [];
                     data.map((job) => {
-                        // Filtering out ALREADY APPLIED JOBS
-                        console.log('444444444444444444444444444444444444444');
-                        console.log(job.id);
-                        console.log(jobIdArr.includes(job.id));
+                        // Filtering out ALREADY APPLIED JOBS\
                         if(!jobIdArr.includes(job.id)){
                             jobData.push(job);
                         }

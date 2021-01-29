@@ -8,6 +8,33 @@ const auth = require('../middleware/auth');
 
 router = Router();
 
+
+// API TO CHECK IF THE EMAIL IS REGISTERED R NOT
+router.get('/email/check/:email', async(req, res) => {
+    try {
+        const admin = await Admin.findOne({ email : req.params.email });
+        console.log(admin);
+
+        if(admin) {
+            return res.status(200).json({
+                sucess: true,
+                existingUser: true
+            })
+        } else {
+            return res.status(200).json({
+                sucess: true,
+                existingUser: false
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            sucess: false,
+            message: err
+        })
+    }
+})
+
 router.post('/login', async(req, res) => {
     try {
         let obj = req.body;
@@ -65,7 +92,7 @@ router.post('/create', async(req, res) => {
         const admin = new Admin({
             name,
             email,
-            company,    
+            company,
             password: pass
         });
         await admin.save();
