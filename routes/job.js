@@ -2,10 +2,41 @@ const { Router } = require('express');
 const jwt = require('jsonwebtoken');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
+const Profile = require('../models/Profile');
+const Admin = require('../models/Admin');
 
 const auth = require('../middleware/auth');
 
 router = Router();
+
+// GET ALL THE JOBS
+router.get('/admin/jobs/:adminId', async(req, res) => {
+    try {
+        const admin = await Admin.findById(req.params.adminId);
+        // If admin is found
+        if(admin) {
+            const jobs = await Job.find({ admin: admin.id });
+            return res.status(200).json({
+                success: true,
+                length: jobs.length,
+                data : jobs,
+            })
+        }
+        // If admin is not found
+        else {
+            return res.status(404).json({
+                success: false,
+                message: 'admin not found'
+            })
+        }
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+});
 
 // ROUTE FOR SEARCH PAGE ( Sorted list of jobs based on profession type provided )
 router.post('/search/', auth, async(req, res) => {
@@ -168,6 +199,73 @@ router.post('/search/profession', auth, async(req, res) => {
     }
 })
 
+// VIEW INDIVIDUAL JOB DETAILS
+router.get('/view/:jobId', async(req, res) => {
+    try {
+        const job = await Job.findById(req.params.jobId);
+        // If job exists
+        if(job) {
+            const admin = await Admin.findById(job.admin);
+            return res.status(200).json({
+                success: true,
+                data: {
+                    job,
+                    admin
+                }
+            })
+        }
+        //  If job does not exists
+        else {
+            return res.status(404).json({
+                success: false,
+                message: 'job not found'
+            })
+        }
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
+// CHANGE STATUS FOR JOB
+router.post('/change/status', async(req, res) => {
+    try {
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const { job, active } = obj;
+        const jobObj = await Job.findById(job);
+        // If job is found
+        if(jobObj) {
+            const newJob = await jobObj.updateOne({
+                active : obj.active
+            })
+            jobObj.save();
+            console.log(newJob);
+
+            return res.status(200).json({
+                success: true
+            })
+        }
+        // IF job is not found
+        else {
+            return res.status(404).json({
+                success: false,
+                message: 'job not found',
+            });
+        }
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
 
 // ROUTE TO CREATE A JOB
 router.post('/create', auth, async(req, res) => {

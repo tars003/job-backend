@@ -38,7 +38,7 @@ const JobSchema = new mongoose.Schema({
           application: {
               type: mongoose.Schema.Types.ObjectId,
           }
-      }  
+      }
     ],
     openings: {
         type: String,
@@ -65,6 +65,10 @@ const JobSchema = new mongoose.Schema({
         required: false,
     },
     address: {
+        type: String,
+        required: false,
+    },
+    active: {
         type: String,
         required: false,
     },

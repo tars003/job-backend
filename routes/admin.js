@@ -8,6 +8,24 @@ const auth = require('../middleware/auth');
 
 router = Router();
 
+// GET ADMIN DETIALS WITH JWT FOR STARTUP
+router.get('/token', auth, async(req, res) => {
+    try {
+        const admin = req.body.user;
+
+        return res.status(200).json({
+            success: true,
+            data: admin
+        });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
 
 // API TO CHECK IF THE EMAIL IS REGISTERED R NOT
 router.get('/email/check/:email', async(req, res) => {
