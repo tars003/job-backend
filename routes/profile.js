@@ -13,8 +13,51 @@ router.post('/search', async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
-        const { professions, location } = obj;
+        const { profession, location } = obj;
+        console.log(obj);
+        let profiles;
+        // If profession is provided
+        if(profession) {
+            // If location is provided
+            if(location.state && location.city) {
+                profiles = await Profile.find({
+                    occupations : {
+                        $elemMatch: { occupation : profession }
+                    },
+                    city: location.city,
+                    state: location.state,
+                });
+            }
+            // If location is not provided
+            else {
+                profiles = await Profile.find({
+                    occupations : {
+                        $elemMatch: { occupation : profession }
+                    },
+                });
+            }
+        }
+        // Only location was provided
+        else if (location.state && location.city) {
+            profiles = await Profile.find({
+                city: location.city,
+                state: location.state,
+            });
+        }
+        // Neither location nor profession was provided
+        else {
+            return res.status(400).json({
+                success: false,
+                message: 'neither location nor profession was provided',
+            });
+        }
 
+        // Returning queried profiles
+        return res.status(200).json({
+            success: true,
+            length: profiles.length,
+            data : profiles
+        });
 
     } catch(err) {
         console.log(err);

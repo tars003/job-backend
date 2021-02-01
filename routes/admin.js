@@ -95,6 +95,29 @@ router.post('/login', async(req, res) => {
     }
 });
 
+// ADMIN EDIT INFO
+router.post('/edit', auth, async(req, res) => {
+    try {
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const { name, email, company, phone } = obj;
+
+        const admin = await Admin.findById(req.body.user.id);
+        await admin.updateOne(obj);
+        admin.save();
+
+        return res.status(200).json({
+            success: true
+        })
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
 
 // CREATING ADMIN
 router.post('/create', async(req, res) => {
