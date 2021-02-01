@@ -97,7 +97,7 @@ router.post('/login', async(req, res) => {
 
 // ADMIN EDIT INFO
 router.post('/edit', auth, async(req, res) => {
-    try {
+    try  {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
         const { name, email, company, phone } = obj;
