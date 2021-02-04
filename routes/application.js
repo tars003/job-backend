@@ -10,6 +10,18 @@ const { formatOccupations } = require('../middleware/occupations');
 
 router = Router();
 
+router.get('/view/applications', auth, async(req, res) => {
+    try {
+        
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: true,
+            message: err
+        })
+    }
+});
+
 router.get('/view/applicant', auth, async(req, res) => {
     try {
         const applicant = await Profile.findById(req.body.user.id);
