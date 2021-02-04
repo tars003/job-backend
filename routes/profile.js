@@ -8,6 +8,66 @@ const { formatOccupations } = require('../middleware/occupations');
 router = Router();
 
 
+// FILTER PROFILES BASED ON LOCATION AND PROFESSION
+router.post('/search', async(req, res) => {
+    try {
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const { profession, location } = obj;
+        console.log(obj);
+        let profiles;
+        // If profession is provided
+        if(profession) {
+            // If location is provided
+            if(location.state && location.city) {
+                profiles = await Profile.find({
+                    occupations : {
+                        $elemMatch: { occupation : profession }
+                    },
+                    city: location.city,
+                    state: location.state,
+                });
+            }
+            // If location is not provided
+            else {
+                profiles = await Profile.find({
+                    occupations : {
+                        $elemMatch: { occupation : profession }
+                    },
+                });
+            }
+        }
+        // Only location was provided
+        else if (location.state && location.city) {
+            profiles = await Profile.find({
+                city: location.city,
+                state: location.state,
+            });
+        }
+        // Neither location nor profession was provided
+        else {
+            return res.status(400).json({
+                success: false,
+                message: 'neither location nor profession was provided',
+            });
+        }
+
+        // Returning queried profiles
+        return res.status(200).json({
+            success: true,
+            length: profiles.length,
+            data : profiles
+        });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
 // INITAL TOKEN ROUTE
 router.get('/token/:no', async(req, res) => {
     try {
@@ -105,13 +165,16 @@ router.post('/create', async(req, res) => {
             })
         }
 
-        const city = req.body.city;
-        const state = req.body.state;
+        const city = req.body.city.toLowerCase();
+        const state = req.body.state.toLowerCase();
         const occupations = formatOccupations(req.body.occupations);
         const age = req.body.age;
         const gender = req.body.gender;
         const name = req.body.name;
         const language = req.body.language;
+        const salaryRange = req.body.salaryRange;
+
+
 
         const payload = {
             contactNumber,
@@ -121,9 +184,11 @@ router.post('/create', async(req, res) => {
             age,
             gender,
             name,
-            language
+            language,
+            salaryRange
         }
 
+        console.log('payload');
         console.log(payload);
         const newProfile = await Profile.create(payload);
 

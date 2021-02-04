@@ -3,7 +3,7 @@ const formatOccupations = (occuArr) => {
     const res = occuArr.map(occupation => {
         console.log(occupation)
         return (
-            { "occupation" : occupation }
+            { "occupation" : occupation.toLowerCase() }
         );
     });
     return res;

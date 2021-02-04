@@ -8,6 +8,53 @@ const auth = require('../middleware/auth');
 
 router = Router();
 
+// GET ADMIN DETIALS WITH JWT FOR STARTUP
+router.get('/token', auth, async(req, res) => {
+    try {
+        const admin = req.body.user;
+
+        return res.status(200).json({
+            success: true,
+            data: admin
+        });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
+// API TO CHECK IF THE EMAIL IS REGISTERED R NOT
+router.get('/email/check/:email', async(req, res) => {
+    try {
+        const admin = await Admin.findOne({ email : req.params.email });
+        console.log(admin);
+
+        if(admin) {
+            return res.status(200).json({
+                sucess: true,
+                existingUser: true
+            })
+        } else {
+            return res.status(200).json({
+                sucess: true,
+                existingUser: false
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            sucess: false,
+            message: err
+        })
+    }
+})
+
+
+// LOGIN ROUTE
 router.post('/login', async(req, res) => {
     try {
         let obj = req.body;
@@ -48,6 +95,31 @@ router.post('/login', async(req, res) => {
     }
 });
 
+// ADMIN EDIT INFO
+router.post('/edit', auth, async(req, res) => {
+    try  {
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const { name, email, company, phone } = obj;
+
+        const admin = await Admin.findById(req.body.user.id);
+        await admin.updateOne(obj);
+        admin.save();
+
+        return res.status(200).json({
+            success: true
+        })
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+})
+
+
+// CREATING ADMIN
 router.post('/create', async(req, res) => {
     try {
         let obj = req.body;
@@ -56,7 +128,8 @@ router.post('/create', async(req, res) => {
            name,
            email,
            company,
-           password
+           password,
+           phone,
         } = obj;
 
         const salt = await bcrypt.genSalt();
@@ -65,8 +138,9 @@ router.post('/create', async(req, res) => {
         const admin = new Admin({
             name,
             email,
-            company,    
-            password: pass
+            company,
+            password: pass,
+            phone,
         });
         await admin.save();
 
