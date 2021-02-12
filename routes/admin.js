@@ -25,7 +25,60 @@ router.get('/token', auth, async(req, res) => {
             message: err.message
         })
     }
-})
+});
+
+router.post('/change/password', auth, async(req, res) => {
+    try {
+        const admin = req.body.user;
+
+        let obj = req.body;
+        obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
+        const { oldPass, pass1, pass2 } = obj;
+
+        const passMatches = await bcrypt.compare(oldPass, admin.password);
+
+        // If password is not correct
+        if(passMatches) {
+            // If password matches
+            if(pass1 == pass2) {
+                const salt = await bcrypt.genSalt();
+                const pass = await bcrypt.hash(pass1, salt);
+                admin.password = pass;
+                admin.save();
+                return res.status(200).json({
+                    success: true,
+                    message: 'password change successfull'
+                })
+            }
+            // If pass does not match
+            else {
+                return res.status(400).json({
+                    success: false,
+                    message: 'passwords do not match',
+                })
+            }
+        }
+        // If password is not correct
+        else {
+            return res.status(400).json({
+                success: false,
+                message: "incorrect password",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: admin
+        });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+});
 
 // API TO CHECK IF THE EMAIL IS REGISTERED R NOT
 router.get('/email/check/:email', async(req, res) => {
