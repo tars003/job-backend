@@ -9,7 +9,7 @@ router = Router();
 
 
 // FILTER PROFILES BASED ON LOCATION AND PROFESSION
-router.post('/search', async(req, res) => {
+router.post('/search', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));

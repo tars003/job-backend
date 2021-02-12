@@ -10,7 +10,7 @@ const auth = require('../middleware/auth');
 router = Router();
 
 // GET ALL THE JOBS
-router.get('/admin/jobs/:adminId', async(req, res) => {
+router.get('/admin/jobs/:adminId', auth, async(req, res) => {
     try {
         const admin = await Admin.findById(req.params.adminId);
         // If admin is found
@@ -200,7 +200,7 @@ router.post('/search/profession', auth, async(req, res) => {
 })
 
 // VIEW INDIVIDUAL JOB DETAILS
-router.get('/view/:jobId', async(req, res) => {
+router.get('/view/:jobId', auth, async(req, res) => {
     try {
         const job = await Job.findById(req.params.jobId);
         // If job exists
@@ -232,7 +232,7 @@ router.get('/view/:jobId', async(req, res) => {
 })
 
 // CHANGE STATUS FOR JOB
-router.post('/change/status', async(req, res) => {
+router.post('/change/status', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));

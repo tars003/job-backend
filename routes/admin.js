@@ -1,12 +1,25 @@
 const { Router } = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const nodemailer = require("nodemailer");
 
 const Admin = require('../models/Admin');
 
 const auth = require('../middleware/auth');
 
 router = Router();
+
+let transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+const genRandPass = () => Math.random().toString(36).slice(-8);
 
 // GET ADMIN DETIALS WITH JWT FOR STARTUP
 router.get('/token', auth, async(req, res) => {
@@ -27,6 +40,8 @@ router.get('/token', auth, async(req, res) => {
     }
 });
 
+
+//  CHANGE PASSWORD
 router.post('/change/password', auth, async(req, res) => {
     try {
         const admin = req.body.user;
@@ -181,11 +196,12 @@ router.post('/create', async(req, res) => {
            name,
            email,
            company,
-           password,
            phone,
         } = obj;
 
+        // Generating random password
         const salt = await bcrypt.genSalt();
+        let password = genRandPass();
         const pass = await bcrypt.hash(password, salt);
 
         const admin = new Admin({
@@ -197,6 +213,15 @@ router.post('/create', async(req, res) => {
         });
         await admin.save();
 
+        // Sending the random password to email
+        let mailInfo = await transporter.sendMail({
+          from: "ajaayysharmaa@gmail.com",
+          to: email,
+          subject: "Your password for Focal Point Admin App",
+          html: `<p>Your password for the focal point admin app is <b>${password}</b></p>`,
+        });
+        console.log("Message sent: %s", mailInfo.messageId);
+
         const tokenPayload = {
             data: {
               id: admin.id
@@ -206,8 +231,9 @@ router.post('/create', async(req, res) => {
 
         return res.status(200).json({
             sucess: true,
-            token,
-            data : admin
+            // token,
+            // data : admin
+            message: 'temprory password sent to mail',
         });
 
     } catch(err) {

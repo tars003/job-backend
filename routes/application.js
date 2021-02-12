@@ -11,7 +11,7 @@ const { formatOccupations } = require('../middleware/occupations');
 router = Router();
 
 // GET ALL APPLICANTS FOR A JOB
-router.get('/all/job/:jobId', async(req, res) => {
+router.get('/all/job/:jobId', auth, async(req, res) => {
     try {
         const job = await Job.findById(req.params.jobId);
         // If job exists
@@ -91,7 +91,7 @@ router.get('/view/applicant', auth, async(req, res) => {
 
 
 // GET INDIVIDUAL APPLICATION
-router.get('/view/:applicationId', async(req, res) => {
+router.get('/view/:applicationId', auth, async(req, res) => {
     try {
         const application = await Application.findById(req.params.applicationId);
         // If application exists
@@ -126,7 +126,7 @@ router.get('/view/:applicationId', async(req, res) => {
 })
 
 // CHANGE STATUS OF APPLICATION
-router.post('/change/status', async(req, res) => {
+router.post('/change/status', auth, async(req, res) => {
     try {
         let obj = req.body;
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
