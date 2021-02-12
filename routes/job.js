@@ -274,6 +274,7 @@ router.post('/create', auth, async(req, res) => {
         obj = JSON.parse(JSON.stringify(obj).replace(/"\s+|\s+"/g, '"'));
         const adminId = req.body.user.id;
         obj['admin'] = adminId;
+        obj['active'] = "true";
 
         const job = new Job(obj);
         await job.save();
