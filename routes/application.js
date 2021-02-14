@@ -18,15 +18,26 @@ router.get('/all/job/:jobId', auth, async(req, res) => {
         if(job) {
             const applications = await Application.find({ job: job.id })
             Promise.all(applications.map((application) => {
-                const applicant = Profile.findById(application.applicant);
+                var applicant = Profile.findById(application.applicant);
+                applicant['applicationId'] = application.id;
+                applicant.applicantId = application.id
+                console.log(application.id);
                 return applicant;
             }))
                 .then((applicants) => {
-                    console.log(applicants);
+                    // console.log('applicants%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+                    // console.log(applicants);
+                    const result = applicants.map((applicant, index) => {
+                        let data = applicant.toObject();
+                        data['applicationId'] = applications[index].id;
+                        return data;
+                    })
+                    console.log('applicants%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+                    console.log(result);
                     return res.status(200).json({
                         success: true,
                         length: applications.length,
-                        data : applicants
+                        data : result
                     })
                 })
         }
