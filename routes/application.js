@@ -25,15 +25,13 @@ router.get('/all/job/:jobId', auth, async(req, res) => {
                 return applicant;
             }))
                 .then((applicants) => {
-                    // console.log('applicants%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-                    // console.log(applicants);
+                    
                     const result = applicants.map((applicant, index) => {
                         let data = applicant.toObject();
                         data['applicationId'] = applications[index].id;
+                        data['appointmentStatus'] = applications[index].status;
                         return data;
                     })
-                    console.log('applicants%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-                    console.log(result);
                     return res.status(200).json({
                         success: true,
                         length: applications.length,
