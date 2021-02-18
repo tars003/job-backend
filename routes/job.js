@@ -275,6 +275,7 @@ router.post('/create', auth, async(req, res) => {
         const adminId = req.body.user.id;
         obj['admin'] = adminId;
         obj['active'] = "true";
+        obj['adminPhone'] = req.body.user.phone;
 
         const job = new Job(obj);
         await job.save();

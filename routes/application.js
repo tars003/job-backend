@@ -69,10 +69,16 @@ router.get('/view/applicant', auth, async(req, res) => {
             return Application.findById(application.application);
         });
 
+        // Array for storing statuses of each application along with job data
         const statusArr = [];
+
+        // Object for storing admin's contact
+        const adminContact = {};
+
         Promise.all(applicationsPromise)
             .then((res) => {
-                // console.log(res);
+                console.log('res')
+                console.log(res);
                 return res;
             })
             .then((res) => {
